@@ -1,0 +1,44 @@
+# Environment variables
+.env
+./config
+config/
+quickstart.md
+scripts/env/
+scripts/venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Data Dumps & Scraping Results
+scripts/collected_discussions/*.json
+*.json.gz
+*.csv
+HelpdeskDB*.raven-database-topology
+
+# C# / .NET
+[Bb]in/
+[Oo]bj/
+*.dll
+*.exe
+*.pdb
+*.user
+*.suo
+
+# Application Settings & Secrets
+appsettings.json
+appsettings.Development.json
+appsettings.local.json

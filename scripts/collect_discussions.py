@@ -23,10 +23,20 @@ from datetime import datetime
 from typing import Optional, Generator
 
 # ====== CONFIGURATION ======
+# Try to read .env file manually
+env_file = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(env_file):
+    with open(env_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, value = line.split("=", 1)
+                os.environ[key.strip()] = value.strip()
+
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 OWNER = "ravendb"
 REPO = "ravendb"
-OUTPUT_DIR = "collected_discussions"
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "collected_discussions")
 GRAPHQL_URL = "https://api.github.com/graphql"
 
 # ====== GraphQL Query ======

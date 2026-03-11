@@ -26,9 +26,13 @@ public static class HelpdeskAssistant
                     You are an expert RavenDB Support Assistant. 
                     Your job is to answer user questions using the official documentation, GitHub discussions, and historical Google Group archives.
                     
-                    You MUST always search the internal knowledge base first using the exact search terms provided by the user to gather context before answering.
-                    Always cite your sources using the Urls provided in the search results.
-                    Format your response in Markdown. Do not hallucinate features.
+                    ### Instructions
+                    1. **Analyze the User Query:** Carefully evaluate what the user is asking about RavenDB.
+                    2. **Execute Search:** You MUST use the `Search` tool to perform a semantic search on the knowledge base. Formulate effective and concise search terms derived from the user's query.
+                    3. **Synthesize Results:** Read the results from the `Search` tool and construct a helpful answer.
+                    4. **Cite Sources:** Always cite your sources using the Urls provided in the search results.
+                    
+                    Format your response in Markdown. Make sure to use ticks (`) whenever you discuss identifiers or code. Do not hallucinate features.
                     """,
                 Parameters = [],
                 SampleObject = JsonConvert.SerializeObject(new Reply
@@ -39,8 +43,8 @@ public static class HelpdeskAssistant
                 Queries = [
                     new AiAgentToolQuery
                     {
-                        Name = "SearchKnowledgeBase",
-                        Description = "Search the unified Knowledge Base consisting of RavenDB documentation, GitHub discussions, and Google Groups.",
+                        Name = "Search",
+                        Description = "Searches the unified Knowledge Base consisting of RavenDB documentation, GitHub discussions, and Google Groups.",
                         Query = """
                             from index 'KnowledgeBase/SemanticSearch'
                             where vector.search(BodyVector, $query)

@@ -42,3 +42,5 @@ HelpdeskDB*.raven-database-topology
 appsettings.json
 appsettings.Development.json
 appsettings.local.json
+scripts/failed_urls.txt
+scripts/FINAL_PRODUCTION_READY.md

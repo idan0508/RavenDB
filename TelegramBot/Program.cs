@@ -16,7 +16,7 @@
  *   3. Make sure RavenDB is running with the AI Agent configured
  *   4. Run: dotnet run
  *
- * Authors: Ron Blanky, Yuval Hasin, Idan Dahan
+ * Authors: Ron Blanky, Idan Dahan
  * Project: RavenDB AI Helpdesk - Final Year Project
  */
 
@@ -232,16 +232,15 @@ async Task HandleCommandAsync(ITelegramBotClient botClient, Message message, Can
                 "ℹ️ **RavenDB Helpdesk Bot**\n\n" +
                 "Built as a Final Year Project by:\n" +
                 "• Ron Blanky\n" +
-                "• Yuval Hasin\n" +
                 "• Idan Dahan\n\n" +
                 "**Tech Stack:**\n" +
                 "• RavenDB 7.2 (AI Agent)\n" +
-                "• Ollama + Llama 3.1\n" +
+                "• Azure OpenAI + GPT-4.1\n" +
                 "• .NET 8 + Telegram.Bot\n\n" +
                 "**Data Sources:**\n" +
-                "• 1,057 GitHub Discussions\n" +
-                "• Google Groups archive\n" +
-                "• Official documentation",
+                "• 1,052 GitHub Discussions\n" +
+                "• 112,190 Google Groups messages\n" +
+                "• 8,000+ pages of official documentation",
                 parseMode: ParseMode.Markdown,
                 cancellationToken: ct);
             break;

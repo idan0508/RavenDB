@@ -3,9 +3,65 @@
 This document is the final, end-to-end technical story for the project.
 It explains what we changed, why we changed it, how we validated it, and what to run next.
 
+For the full system architecture diagram, data schemas, and cost analysis, see [ARCHITECTURE.md](../ARCHITECTURE.md).
+
 ---
 
-## Recent Updates (Mar 18–19)
+## April 2026 — Azure AI Migration & Documentation
+
+### What changed
+
+We migrated the entire AI backend from **Ollama + Llama 3.1:8b** (local GPU) to **Azure OpenAI** (cloud API).
+
+### Why we changed this
+
+The fundamental blocker was **text embeddings**. Our RAG pipeline requires two AI capabilities:
+1. **Chat** — to generate human-readable answers from retrieved documents.
+2. **Text Embeddings** — to convert text into vectors for semantic search.
+
+Ollama provided only Chat. Its available embedding models (like `nomic-embed-text`) lacked the quality and integration we needed for production semantic search. Azure OpenAI provides both capabilities through a single, consistent API:
+
+| Capability | Old (Ollama) | New (Azure) |
+|---|---|---|
+| Chat | `llama3.1:8b` (local, 8GB VRAM) | `gpt-4.1-mini` (cloud) |
+| Embeddings | ❌ Not available | `text-embedding-3-small` (cloud) |
+| Context window | 8K (VRAM-limited) | 128K+ (no local constraint) |
+| Tool-calling | Fragile (state machine prompts) | Reliable (native support) |
+
+### What we configured
+
+1. **Connection Strings** in RavenDB Studio:
+   - `Azure-Chat` — Chat type, `gpt-4.1-mini`, Azure OpenAI connector
+   - `Azure-Text-Embeddings` — Text Embeddings type, `text-embedding-3-small`
+
+2. **Embedding Generation Tasks:**
+   - `documentations` — embeds `SearchableContent` from `Documentation_Sitemaps` using MarkDownSplitParagraphs chunking
+   - `discussions` — embeds `Body` from `Discussions` using PlainTextSplit chunking
+
+3. **Semantic Search Indexes:**
+   - `KnowledgeBase/SemanticSearch/Documentations` — vectorizes documentation
+   - `KnowledgeBase/SemanticSearch/Discussions` — vectorizes discussions
+
+4. **Documentation overhaul:**
+   - Created `ARCHITECTURE.md` — permanent record of the full RAG pipeline
+   - Created `README.md` — project-level overview
+   - Updated `LOCAL_SETUP_GUIDE.md` — Azure AI setup instructions
+   - Updated `AI_AGENT_GUIDE.md` — removed Ollama-specific content, preserved prompt engineering
+   - Updated `PROJECT_STATUS.md` — current milestone status
+   - Updated `SETTING_UP_VECTORS.md` — Azure embedding task configuration
+   - Created `reference_projects/PURPOSE.md` — explainer for PropertySphere
+
+### Impact
+
+- The RAG pipeline is now fully operational with real embeddings.
+- Semantic search works across Documentation and Discussions.
+- The system prompt is simpler (Azure models handle tool-calling natively).
+- Total estimated AI cost: < $2.00 for all embeddings across all collections.
+- All documentation is current and internally consistent.
+
+---
+
+## March 18–19, 2026 — Pipeline Hardening
 
 Summary: we hardened the sitemap scraper and ingestion pipeline to reduce false negatives, make reruns safe and incremental, and improve embedding hygiene.
 

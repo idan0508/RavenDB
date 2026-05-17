@@ -19,7 +19,7 @@ from urllib.parse import urljoin, urlparse
 import re
 
 # Configuration
-DOCS_BASE_URL = "https://ravendb.net/docs/article-page/7.0"
+DOCS_BASE_URL = "https://ravendb.net/docs/article-page/7.2"
 DOCS_SECTIONS = [
     "/csharp",  # C# Documentation
     "/python",  # Python Documentation

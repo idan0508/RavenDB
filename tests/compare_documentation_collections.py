@@ -13,6 +13,7 @@ Requirements:
 """
 
 import sys
+import os
 import argparse
 from ravendb import DocumentStore
 from collections import Counter
@@ -29,8 +30,8 @@ HANDSHAKE = '[TIE]' if WINDOWS_POWERSHELL else '🤝'
 DOCUMENT = '[DOC]' if WINDOWS_POWERSHELL else '📄'
 
 # Configuration
-RAVENDB_URL = "http://localhost:8080"
-DATABASE_NAME = "HelpdeskDB"
+RAVENDB_URL = os.environ.get("RAVENDB_URL", "http://100.68.0.72:8080")
+DATABASE_NAME = os.environ.get("RAVENDB_DATABASE", "HelpdeskDB")
 
 # Noise indicators (common scraping artifacts)
 NOISE_PATTERNS = [

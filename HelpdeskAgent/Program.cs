@@ -11,8 +11,10 @@ namespace HelpdeskAgent
     {
         static async Task Main(string[] args)
         {
-            var ravenDbUrl = "http://127.0.0.1:8080";
-            var databaseName = "HelpdeskDB";
+            var ravenDbUrl = Environment.GetEnvironmentVariable("RAVENDB_URL")
+                ?? "http://100.68.0.72:8080";
+            var databaseName = Environment.GetEnvironmentVariable("RAVENDB_DATABASE")
+                ?? "HelpdeskDB";
 
             Console.WriteLine($"Connecting to RavenDB at {ravenDbUrl} (Database: {databaseName})...");
 
@@ -44,7 +46,10 @@ namespace HelpdeskAgent
 
             if (args.Length > 0 && args[0] == "--import-mbox")
             {
-                var path = @"C:\Users\Ron\Downloads\ravendb-googlegroups.mbox\ravendb-googlegroups.mbox";
+                var path = args.Length > 1
+                    ? args[1]
+                    : Environment.GetEnvironmentVariable("MBOX_PATH")
+                        ?? @"C:\Users\Ron\Downloads\ravendb-googlegroups.mbox\ravendb-googlegroups.mbox";
                 await MboxImporter.ImportAsync(store, path);
             }
 

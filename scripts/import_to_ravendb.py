@@ -25,8 +25,8 @@ import requests
 from datetime import datetime
 
 # ====== CONFIGURATION ======
-RAVENDB_URL = "http://127.0.0.1:8080"
-DATABASE_NAME = "HelpdeskDB"
+RAVENDB_URL = os.environ.get("RAVENDB_URL", "http://100.68.0.72:8080")
+DATABASE_NAME = os.environ.get("RAVENDB_DATABASE", "HelpdeskDB")
 INPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "collected_discussions")
 
 # Source configurations: (file_pattern, collection, id_field)

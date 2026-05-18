@@ -43,6 +43,7 @@ Enhanced: 2026-03-18 with RAG optimization best practices
 """
 
 import argparse
+import os
 import requests
 import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
@@ -59,8 +60,8 @@ from datetime import datetime, timezone
 import tiktoken
 
 # ====== CONFIGURATION ======
-RAVENDB_URL = "http://localhost:8080"
-DATABASE_NAME = "HelpdeskDB"
+RAVENDB_URL = os.environ.get("RAVENDB_URL", "http://100.68.0.72:8080")
+DATABASE_NAME = os.environ.get("RAVENDB_DATABASE", "HelpdeskDB")
 COLLECTION_NAME = "Documentation"
 SITEMAP_URL = "https://docs.ravendb.net/sitemap.xml"
 

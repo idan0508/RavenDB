@@ -11,7 +11,7 @@ Usage:
     1. Set environment variable: $env:GITHUB_TOKEN = "your_token_here"
     2. Run: python collect_discussions.py
 
-Author: Ron Blanky, Idan Dahan
+Author: Ron Blanki, Idan Dahan
 Project: RavenDB AI Helpdesk - Final Year Project
 """
 

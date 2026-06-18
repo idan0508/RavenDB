@@ -1,7 +1,7 @@
 # RavenDB AI Helpdesk — Architecture Document
 
 **Project:** RavenDB AI Helpdesk Agent  
-**Team:** Ron Blanky, Idan Dahan  
+**Team:** Ron Blanki, Idan Dahan  
 **Last Updated:** April 19, 2026  
 **Status:** Production Pipeline Operational (Documentation + Discussions)
 

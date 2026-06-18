@@ -1,4 +1,4 @@
-﻿/*
+/*
  * RavenDB Helpdesk Telegram Bot
  * ==============================
  * A Telegram bot that answers RavenDB questions
@@ -8,7 +8,7 @@
  * Adapted for the RavenDB Helpdesk use case.
  *
  * Architecture:
- *   User (Telegram) → This Bot → RavenDB AI Agent → Ollama LLM → Response
+ *   User (Telegram) → This Bot → RavenDB AI Agent → Azure OpenAI → Response
  *
  * Setup:
  *   1. Create a bot via @BotFather on Telegram → get the token
@@ -16,7 +16,7 @@
  *   3. Make sure RavenDB is running with the AI Agent configured
  *   4. Run: dotnet run
  *
- * Authors: Ron Blanky, Idan Dahan
+ * Authors: Ron Blanki, Idan Dahan
  * Project: RavenDB AI Helpdesk - Final Year Project
  */
 
@@ -161,7 +161,7 @@ async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, Cancel
         // Send response with Markdown, falling back to plain text
         await SendMessageSafeAsync(botClient, chatId, response, ct);
 
-        Console.WriteLine($"📤 [{userName}] Response sent ({response.Length} chars)");
+        Console.WriteLine($"📤 [RavenDB AI Agent] Response sent ({response.Length} chars)");
     }
     catch (Exception ex)
     {
@@ -231,7 +231,7 @@ async Task HandleCommandAsync(ITelegramBotClient botClient, Message message, Can
             await botClient.SendMessage(chatId,
                 "ℹ️ **RavenDB Helpdesk Bot**\n\n" +
                 "Built as a Final Year Project by:\n" +
-                "• Ron Blanky\n" +
+                "• Ron Blanki\n" +
                 "• Idan Dahan\n\n" +
                 "**Tech Stack:**\n" +
                 "• RavenDB 7.2 (AI Agent)\n" +
@@ -284,12 +284,12 @@ async Task<string> AskAgentAsync(string question, string conversationId, Cancell
         var answer = result.Answer.Answer;
 
         // Append sources if available
-        if (result.Answer.Sources is { Length: > 0 })
+        if (result.Answer.ReferenceUrls is { Length: > 0 })
         {
             answer += "\n\n📎 **Sources:**\n";
-            foreach (var source in result.Answer.Sources)
+            foreach (var url in result.Answer.ReferenceUrls)
             {
-                answer += $"• {source}\n";
+                answer += $"• {url}\n";
             }
         }
 
@@ -312,8 +312,8 @@ async Task<string> AskAgentAsync(string question, string conversationId, Cancell
         if (ex.Message.Contains("connection", StringComparison.OrdinalIgnoreCase) ||
             ex.Message.Contains("timeout", StringComparison.OrdinalIgnoreCase))
         {
-            return "⚠️ The LLM (Ollama) took too long to respond. " +
-                   "Make sure Ollama is running: ollama serve";
+            return "⚠️ The LLM (Azure OpenAI) took too long to respond. " +
+                   "Please try your question again in a moment.";
         }
 
         return $"⚠️ Error from RavenDB: {ex.Message}";
@@ -361,6 +361,6 @@ async Task SendSingleMessageSafeAsync(ITelegramBotClient botClient, long chatId,
 public class AgentReply
 {
     public string Answer { get; set; } = string.Empty;
-    public string[] Sources { get; set; } = [];
+    public string[] ReferenceUrls { get; set; } = [];
 }
 

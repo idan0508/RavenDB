@@ -14,7 +14,7 @@ Usage:
     python import_to_ravendb.py --source google_groups    # Import only Google Groups
     python import_to_ravendb.py --source documentation    # Import only documentation
 
-Author: Ron Blanky, Idan Dahan
+Author: Ron Blanki, Idan Dahan
 Project: RavenDB AI Helpdesk - Final Year Project
 """
 

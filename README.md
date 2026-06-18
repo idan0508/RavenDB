@@ -2,7 +2,7 @@
 
 An **Retrieval-Augmented Generation (RAG)** helpdesk system built on **RavenDB 7.2**, powered by **Azure OpenAI**. It answers technical questions about RavenDB by semantically searching through 120,000+ knowledge documents spanning official documentation, GitHub discussions, and historical Google Groups archives.
 
-**Team:** Ron Blanky, Idan Dahan  
+**Team:** Ron Blanki, Idan Dahan  
 **Academic:** Final Year Project — Ruppin Academic Center  
 **Supervisor:** Oren Eini (CEO, RavenDB / Hibernating Rhinos)
 
@@ -146,11 +146,14 @@ dotnet run
 
 ### 5. Start Telegram Bot
 
+To start the Telegram bot locally so it connects to the RavenDB Agent:
+
 ```powershell
 cd TelegramBot
-# Edit appsettings.json with your bot token
+# Ensure appsettings.json has your bot token and correct IP
 dotnet run
 ```
+*(Press `Ctrl+C` in the terminal to stop the bot at any time).*
 
 ---
 

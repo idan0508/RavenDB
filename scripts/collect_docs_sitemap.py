@@ -38,7 +38,7 @@ Usage:
     python collect_docs_sitemap.py --all-versions
     python collect_docs_sitemap.py --include-guides
 
-Authors: Ron Blanky, Idan Dahan
+Authors: Ron Blanki, Idan Dahan
 Enhanced: 2026-03-18 with RAG optimization best practices
 """
 

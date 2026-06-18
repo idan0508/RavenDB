@@ -1,6 +1,6 @@
 # RavenDB AI Helpdesk — Project Status
 
-**Team:** Ron Blanky, Idan Dahan  
+**Team:** Ron Blanki, Idan Dahan  
 **Last Updated:** April 19, 2026
 
 ---

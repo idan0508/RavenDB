@@ -1,6 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Operations.AI;
+using Raven.Client.Documents.Operations.ConnectionStrings;
+using Raven.Client.ServerWide.Operations;
 using HelpdeskAgent.Model;
 using HelpdeskAgent.Indexes;
 using HelpdeskAgent.Agent;
@@ -25,7 +28,30 @@ namespace HelpdeskAgent
             };
             store.Initialize();
 
+            // 0. AI Connection String Configuration
+            var aiApiKey = Environment.GetEnvironmentVariable("AI_API_KEY");
+            if (!string.IsNullOrWhiteSpace(aiApiKey) && aiApiKey != "YOUR_API_KEY_HERE")
+            {
+                var aiConnection = new AiConnectionString
+                {
+                    Name = "Azure-Chat",
+                    Identifier = "azure-chat",
+                    OpenAiSettings = new OpenAiSettings
+                    {
+                        ApiKey = aiApiKey,
+                        Endpoint = "YOUR_ENDPOINT_HERE", // TODO: Replace with your actual endpoint
+                        Model = "YOUR_DEPLOYMENT_HERE"   // TODO: Replace with your actual deployment/model name
+                    },
+                    ModelType = AiModelType.Chat
+                };
 
+                store.Maintenance.Send(new PutConnectionStringOperation<AiConnectionString>(aiConnection));
+                Console.WriteLine("AI Connection String registered successfully.");
+            }
+            else
+            {
+                Console.WriteLine("AI Connection String skipped. (Set AI_API_KEY to deploy it automatically).");
+            }
 
             // 1. Create Indexes
             Console.WriteLine("Deploying Indexes...");
@@ -54,7 +80,7 @@ namespace HelpdeskAgent
             }
 
             Console.WriteLine("\n--- Configuration Complete ---");
-            Console.WriteLine("You can now go to RavenDB Studio -> AI Agents and use the 'RavenDB Expert Assistant'.");
+            Console.WriteLine("You can now go to RavenDB Studio -> AI Agents and use the 'RavenDB - HelpDesk AI'.");
         }
     }
 }

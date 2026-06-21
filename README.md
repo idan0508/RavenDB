@@ -1,6 +1,6 @@
 # RavenDB AI Helpdesk Agent
 
-An **Retrieval-Augmented Generation (RAG)** helpdesk system built on **RavenDB 7.2**, powered by **Azure OpenAI**. It answers technical questions about RavenDB by semantically searching through 120,000+ knowledge documents spanning official documentation, GitHub discussions, and historical Google Groups archives.
+A **Retrieval-Augmented Generation (RAG)** helpdesk system built on **RavenDB 7.2**, powered by **Azure OpenAI**. It answers technical questions from retrieved RavenDB documentation, GitHub Discussions, and historical Google Groups content. When retrieval does not support an answer, it explicitly reports that no reliable answer was found.
 
 **Team:** Ron Blanki, Idan Dahan  
 **Academic:** Final Year Project — Ruppin Academic Center  
@@ -62,7 +62,7 @@ RavenDB/
 │
 ├── HelpdeskAgent/               # .NET project: Agent definition + data models
 │   ├── Agent/                   #   AI Agent configuration (HelpdeskAssistant.cs)
-│   ├── Indexes/                 #   Multi-map semantic search index
+│   ├── Indexes/                 #   Three source-specific semantic search indexes
 │   ├── Model/                   #   Data models (Discussion, Documentation, GoogleGroupMessage)
 │   ├── MboxImporter.cs          #   Google Groups .mbox file importer
 │   └── Program.cs               #   Entry point: deploys agent + index to RavenDB
@@ -137,12 +137,20 @@ python scripts\collect_discussions.py
 python scripts\import_to_ravendb.py --source discussions
 ```
 
-### 4. Deploy Agent & Index
+### 4. Deploy Agent & Three Indexes
 
 ```powershell
 cd HelpdeskAgent
 dotnet run
 ```
+
+This deploys the three index names used by the working Studio configuration:
+
+- `KnowledgeBase/SemanticSearch/Documentations`
+- `KnowledgeBase/SemanticSearch/Discussions`
+- `KnowledgeBase/SemanticSearch/GoogleGroups`
+
+It also registers the `ravendb-helpdesk-grounded-v1` test agent. The agent searches documentation first, then Discussions, then Google Groups. Telegram only displays a grounded answer when it contains an allowed retrieved source URL.
 
 ### 5. Start Telegram Bot
 

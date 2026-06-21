@@ -1,7 +1,7 @@
 # RavenDB AI Helpdesk — Project Status
 
 **Team:** Ron Blanki, Idan Dahan  
-**Last Updated:** April 19, 2026
+**Last Updated:** June 18, 2026
 
 ---
 
@@ -15,7 +15,17 @@ Build a production-ready AI Helpdesk pipeline for RavenDB support:
 
 ---
 
-## Current Milestone (April 19, 2026)
+## Current Milestone (June 18, 2026)
+
+### Grounded Agent Configuration Replicated in Code
+
+| Item | Status | Details |
+|---|---|---|
+| Separate semantic indexes | ✅ Implemented | Documentation, Discussions, and Google Groups are deployed independently |
+| Agent retrieval order | ✅ Implemented | Documentation → Discussions → Google Groups |
+| No-answer contract | ✅ Implemented | `NotFound` response states that the knowledge base was searched |
+| URL safety | ✅ Implemented | Telegram permits only RavenDB docs and exact RavenDB Discussion URLs |
+| Reproducible identifier | ✅ Implemented | `ravendb-helpdesk-grounded-v1` |
 
 ### Platform Migration Complete
 
@@ -25,7 +35,7 @@ Build a production-ready AI Helpdesk pipeline for RavenDB support:
 | Ollama/Llama retirement | ✅ Complete | Local GPU no longer required for AI operations |
 | Embedding tasks (Documentation) | ✅ Active | `documentations` task on `Documentation_Sitemaps.SearchableContent` |
 | Embedding tasks (Discussions) | ✅ Active | `discussions` task on `Discussions.Body` |
-| Semantic search indexes | ✅ Active | Per-collection indexes in Studio; unified multi-map in C# code |
+| Semantic search indexes | ✅ Defined in code | Three per-collection indexes matching Studio |
 | Architecture documentation | ✅ Complete | `ARCHITECTURE.md` created with full pipeline record |
 
 ### Data Pipeline Status
@@ -104,15 +114,13 @@ Build a production-ready AI Helpdesk pipeline for RavenDB support:
 
 ## What's Next
 
-### Immediate — Google Groups Embeddings
-1. Inspect `GoogleGroupMessages` documents in RavenDB Studio for data quality
-2. Assess whether raw `Body` field needs preprocessing (email noise, quoted replies)
-3. Create embedding generation task (`google-groups`) targeting `Body` or `SearchableContent`
-4. Create or update semantic search index to include Google Groups vectors
-5. Test agent answers with questions that should match historical Google Groups content
+### Immediate — End-to-End Validation
+1. Deploy the code configuration to the target `HelpdeskDB`
+2. Verify the three embedding tasks and indexes are healthy
+3. Test known-answer, unknown-answer, and version-clarification scenarios
+4. Run Telegram against `ravendb-helpdesk-grounded-v1`
 
 ### Upcoming — Final Integration
-- Deploy unified multi-map index (`KnowledgeBase/SemanticSearch`) from C# code
 - Run end-to-end verification: Telegram → Agent → Semantic Search → Answer
 - Create benchmark QA set for retrieval quality validation
 - Final presentation preparation

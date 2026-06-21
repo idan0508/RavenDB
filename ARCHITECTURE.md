@@ -2,7 +2,7 @@
 
 **Project:** RavenDB AI Helpdesk Agent  
 **Team:** Ron Blanki, Idan Dahan  
-**Last Updated:** April 19, 2026  
+**Last Updated:** June 18, 2026
 **Status:** Production Pipeline Operational (Documentation + Discussions)
 
 ---
@@ -78,9 +78,9 @@ The system uses **Azure OpenAI** for both chat (answer generation) and text embe
 │           │                     │                      │             │
 │           ▼                     ▼                      ▼             │
 │  ┌──────────────────────────────────────────────────────────────┐   │
-│  │        Semantic Search Index (KnowledgeBase/SemanticSearch)   │   │
+│  │             Three Separate Semantic Search Indexes            │   │
 │  │                                                              │   │
-│  │  Multi-Map Index:                                            │   │
+│  │  Source-specific indexes:                                    │   │
 │  │    Documentation_Sitemaps → Title, Body, Category, Url,      │   │
 │  │                             Source, BodyVector                │   │
 │  │    Discussions            → Title, Body, Category, Url,      │   │
@@ -91,11 +91,11 @@ The system uses **Azure OpenAI** for both chat (answer generation) and text embe
 │                                │                                     │
 │                                ▼                                     │
 │  ┌──────────────────────────────────────────────────────────────┐   │
-│  │                    AI Agent (RavenDB Expert Assistant)        │   │
+│  │                AI Agent (RavenDB Helpdesk Grounded v1)       │   │
 │  │                                                              │   │
 │  │  Chat Model: Azure gpt-4.1-mini                              │   │
-│  │  Query Tool: "Search" → vector.search(BodyVector, $query)    │   │
-│  │  Response: { Answer, ReferenceUrls[] }                       │   │
+│  │  Tools: Documentation → Discussions → Google Groups          │   │
+│  │  Response: { Answer, AnswerStatus, ReferenceUrls[] }         │   │
 │  └─────────────────────────────┬────────────────────────────────┘   │
 │                                │                                     │
 └────────────────────────────────┼─────────────────────────────────────┘
@@ -356,7 +356,7 @@ We migrated from **Ollama + Llama 3.1:8b** (local GPU) to **Azure OpenAI** for a
 |---|---|---|---|---|---|---|---|
 | `documentations` | `Documentation_Sitemaps` | `SearchableContent` | MarkDownSplitParagraphs | 2048 | 0 | Azure-Text-Embeddings | ✅ Active |
 | `discussions` | `Discussions` | `Body` | PlainTextSplit | 2048 | 0 | Azure-Text-Embeddings | ✅ Active |
-| `google-groups` | `GoogleGroupMessages` | `Body` | PlainTextSplit | 2048 | 0 | Azure-Text-Embeddings | ⏳ Pending |
+| `groups` | `GoogleGroupMessages` | `Body`, `Title` | PlainTextSplit | 2048 | 0 | Azure-Text-Embeddings | ✅ Complete |
 
 ### Why MarkDownSplitParagraphs for Documentation?
 
@@ -398,54 +398,15 @@ docs.Discussions.Select(doc => new {
 })
 ```
 
-### Unified Multi-Map Index (Target — C# Code)
+### Separate Per-Source Indexes (Production)
 
-The final production architecture uses a single multi-map index defined in `HelpdeskAgent/Indexes/KnowledgeBase_SemanticSearch.cs` that unifies all three collections:
+The production architecture deploys three indexes from `HelpdeskAgent/Indexes/`, matching the working RavenDB Studio configuration:
 
-```csharp
-public class KnowledgeBase_SemanticSearch : AbstractMultiMapIndexCreationTask
-{
-    public KnowledgeBase_SemanticSearch()
-    {
-        // Map 1: Documentation
-        AddMap<Documentation>(docs => from doc in docs
-            select new {
-                Title = doc.Title,
-                Body = doc.Body,
-                Category = doc.Category,
-                Url = doc.Url,
-                Source = "Documentation",
-                BodyVector = CreateVector("embed-docs")
-            });
+- `KnowledgeBase/SemanticSearch/Documentations` loads vectors from the `documentations` embedding task.
+- `KnowledgeBase/SemanticSearch/Discussions` loads vectors from the `discussions` embedding task.
+- `KnowledgeBase/SemanticSearch/GoogleGroups` loads `Body` and `Title` vectors from the `groups` embedding task identifier.
 
-        // Map 2: GitHub Discussions
-        AddMap<Discussion>(discussions => from doc in discussions
-            select new {
-                Title = doc.Title,
-                Body = doc.Body,
-                Category = doc.Category.Name,
-                Url = doc.Url,
-                Source = "GitHub Discussions",
-                BodyVector = CreateVector("embed-discussions")
-            });
-
-        // Map 3: Google Groups
-        AddMap<GoogleGroupMessage>(messages => from doc in messages
-            select new {
-                Title = doc.Title,
-                Body = doc.Body,
-                Category = doc.Category.Name,
-                Url = doc.Url,
-                Source = "Google Groups",
-                BodyVector = CreateVector("embed-google-groups")
-            });
-
-        Configuration["Indexing.Static.SearchEngineType"] = "Corax";
-    }
-}
-```
-
-**Key design:** The agent issues a single query (`from index 'KnowledgeBase/SemanticSearch'`) and receives results from all three data sources, ranked by semantic relevance.
+The agent queries each source independently. This preserves source priority, allows each retrieval path to be tested separately, and matches the Studio configuration that produced grounded answers.
 
 ---
 
@@ -455,47 +416,30 @@ public class KnowledgeBase_SemanticSearch : AbstractMultiMapIndexCreationTask
 
 | Setting | Value |
 |---|---|
-| Name | `RavenDB Expert Assistant` |
-| Identifier | `raven-helpdesk-assistant` |
+| Name | `RavenDB Helpdesk Grounded v1` |
+| Identifier | `ravendb-helpdesk-grounded-v1` |
 | Connection String | `Azure-Chat` (gpt-4.1-mini) |
-| Query Tool | `Search` — unified semantic search |
+| Query Tools | `SearchDocumentation`, `SearchDiscussions`, `SearchGoogleGroups` |
 
-### System Prompt
+### System Prompt Contract
 
-```
-You are an expert RavenDB Support Assistant.
-Your job is to answer user questions using the official documentation,
-GitHub discussions, and historical Google Group archives.
-
-### Instructions
-1. **Analyze the User Query:** Carefully evaluate what the user is asking.
-2. **Execute Search:** You MUST use the `Search` tool to perform a semantic
-   search on the knowledge base. Formulate effective and concise search terms.
-3. **Synthesize Results:** Read the results and construct a helpful answer.
-4. **Cite Sources:** Always cite your sources using the Urls from search results.
-
-Format your response in Markdown. Use ticks (`) for identifiers or code.
-Do not hallucinate features.
-```
+The agent searches Documentation first, then GitHub Discussions, then Google Groups as a historical fallback. It may not answer technical questions from model memory.
 
 ### Query Tool Configuration
 
-```sql
-from index 'KnowledgeBase/SemanticSearch'
-where vector.search(BodyVector, $query)
-limit 5
-```
-
-**Sample parameters:** `{"query": "Exact keywords to search for in the database"}`
+Each tool runs `vector.search(BodyVector, $query)` against its matching source-specific index and returns a compact projection containing the source title, body, metadata, and URL where applicable.
 
 ### Response Schema
 
 ```json
 {
   "Answer": "Detailed explanation of the solution based on the documentation.",
-  "ReferenceUrls": ["https://docs.ravendb.net/...", "https://github.com/..."]
+  "AnswerStatus": "Grounded",
+  "ReferenceUrls": ["https://docs.ravendb.net/article-page/7.2/..."]
 }
 ```
+
+Allowed statuses are `Grounded`, `NeedsClarification`, and `NotFound`. Telegram rejects a `Grounded` response that has no allowed source URL.
 
 ---
 

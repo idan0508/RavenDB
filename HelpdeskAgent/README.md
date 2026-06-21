@@ -1,28 +1,49 @@
-# RavenDB Helpdesk Agent Configuration
+# RavenDB Helpdesk Agent Deployment
 
-This project contains the configuration and logic to deploy the "RavenDB - HelpDesk AI" Agent directly into your RavenDB database using the "Code as Configuration" pattern. 
+This project deploys the reproducible RavenDB configuration for the grounded helpdesk agent:
 
-## How to Run
+- three separate semantic-search indexes;
+- three source-specific query tools;
+- an evidence-first system prompt;
+- structured `Grounded`, `NeedsClarification`, and `NotFound` responses.
 
-1. Open your terminal.
-2. Navigate to the project's root folder:
-   ```bash
-   cd C:\Users\Ron\Documents\GitHub\RavenDB\HelpdeskAgent
-   ```
-3. Run the deployment script:
-   ```bash
-   dotnet run
-   ```
+## Prerequisites
 
-You will see the console log `Helpdesk Assistant registered successfully`. If you open your RavenDB Studio under the **AI Agents** section, you will see your new Agent fully configured!
+In `HelpdeskDB`, configure:
 
-## Creating Multiple Agents
+- `Azure-Chat` as a Chat AI connection string;
+- `Azure-Text-Embeddings` as a Text Embeddings connection string;
+- embedding task identifiers `documentations`, `discussions`, and `groups`.
 
-If you want to experiment with different agent behaviors simultaneously (e.g., testing different system prompts), you can deploy a *new* agent rather than overwriting the existing one.
+See `docs/SETTING_UP_VECTORS.md` for exact collections and source paths.
 
-To do this:
-1. Open `Agent/HelpdeskAssistant.cs`
-2. Modify the `AgentId` constant to a new identifier (e.g., `"ravendb-helpdesk-ai-2"`)
-3. Run `dotnet run` again. 
+## Deploy
 
-You will now have two distinct agents side-by-side in your RavenDB Studio.
+```powershell
+$env:RAVENDB_URL = "http://127.0.0.1:8080"
+$env:RAVENDB_DATABASE = "HelpdeskDB"
+dotnet run --project HelpdeskAgent
+```
+
+By default this creates or updates only:
+
+- AI Agent identifier `ravendb-helpdesk-grounded-v1`
+
+It reuses the three existing indexes and does not overwrite AI connection strings or secrets.
+
+To explicitly create or update the index definitions:
+
+```powershell
+dotnet run --project HelpdeskAgent -- --indexes
+```
+
+## Verify
+
+In RavenDB Studio:
+
+1. Check all three indexes are non-stale.
+2. Test each vector query independently.
+3. Open AI Hub → AI Agents → `RavenDB Helpdesk Grounded v1`.
+4. Ask one known question and one unsupported question.
+
+The known answer must include retrieved references. The unsupported answer must say that the knowledge base was searched and no reliable answer was found.

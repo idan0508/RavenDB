@@ -1,6 +1,8 @@
 # Telegram Bot for RavenDB AI
 
-This project is the Telegram Bot client that connects to the RavenDB Helpdesk AI Agent.
+This project is the Telegram client for the RavenDB Helpdesk AI Agent.
+
+The client applies a final response safety check. It only displays `Grounded` answers that contain at least one HTTPS source from `docs.ravendb.net` or an exact `github.com/ravendb/ravendb/discussions/{number}` URL. Invalid, missing, or unsupported evidence is replaced by the standard not-found guidance.
 
 ## Changing the Connected AI Agent
 
@@ -17,7 +19,7 @@ If you have created a new AI Agent in RavenDB (for example, to test new system p
             "http://100.68.0.72:8080"
         ],
         "Database": "HelpdeskDB",
-        "AgentName": "ravendb-helpdesk-ai-2" // <-- Change this to test the new agent!
+        "AgentName": "ravendb-helpdesk-grounded-v1"
     },
     "Telegram": { ... }
 }

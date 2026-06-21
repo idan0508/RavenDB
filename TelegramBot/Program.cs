@@ -280,22 +280,7 @@ async Task<string> AskAgentAsync(string question, string conversationId, Cancell
         // Run and get response (same as PropertySphere line 288)
         var result = await conversation.RunAsync<AgentReply>(ct);
 
-        // Format response
-        var answer = result.Answer.Answer;
-
-        // Append sources if available
-        if (result.Answer.ReferenceUrls is { Length: > 0 })
-        {
-            answer += "\n\n📎 **Sources:**\n";
-            foreach (var url in result.Answer.ReferenceUrls)
-            {
-                answer += $"• {url}\n";
-            }
-        }
-
-        return string.IsNullOrWhiteSpace(answer)
-            ? "I couldn't find a relevant answer. Please try rephrasing your question."
-            : answer;
+        return AgentResponseSafety.FormatForUser(result.Answer);
     }
     catch (Raven.Client.Exceptions.RavenException ex)
     {
@@ -361,6 +346,7 @@ async Task SendSingleMessageSafeAsync(ITelegramBotClient botClient, long chatId,
 public class AgentReply
 {
     public string Answer { get; set; } = string.Empty;
+    public string AnswerStatus { get; set; } = "NotFound";
     public string[] ReferenceUrls { get; set; } = [];
 }
 

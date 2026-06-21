@@ -1,6 +1,6 @@
 # Local Setup Guide — RavenDB AI Helpdesk
 
-**Updated:** April 19, 2026
+**Updated:** June 18, 2026
 
 ---
 
@@ -12,7 +12,7 @@
 | **License** | ✅ Applied | **Developer License** (Ruppin) — AI features unlocked |
 | **Azure AI** | ✅ Configured | Chat (`gpt-4.1-mini`) + Embeddings (`text-embedding-3-small`) |
 | **Data** | ✅ Ingested | Documentation (~8k), Discussions (1,052), Google Groups (112k) |
-| **Agent** | ✅ Defined | `RavenDB Expert Assistant` with semantic search tool |
+| **Agent** | ✅ Defined | `RavenDB Helpdesk Grounded v1` with three source-specific search tools |
 | **Telegram Bot** | ✅ Built | Ready to run with valid bot token |
 
 ---
@@ -139,6 +139,7 @@ Navigate to **AI Hub** → **Embeddings Generation**.
 |---|---|---|---|
 | `documentations` | Documentation_Sitemaps | SearchableContent | Should show ✅ Enabled |
 | `discussions` | Discussions | Body | Should show ✅ Enabled |
+| `groups` | GoogleGroupMessages | Body, Title | Existing task name: `googlegroups_embeddings` |
 
 ---
 
@@ -149,6 +150,7 @@ Navigate to **Indexes** in Studio.
 Confirm these indexes exist and are not stale:
 - `KnowledgeBase/SemanticSearch/Documentations`
 - `KnowledgeBase/SemanticSearch/Discussions`
+- `KnowledgeBase/SemanticSearch/GoogleGroups`
 
 ---
 
@@ -174,8 +176,9 @@ dotnet run
 ```
 
 This will:
-1. Deploy the `KnowledgeBase_SemanticSearch` multi-map index
-2. Register the `RavenDB Expert Assistant` AI Agent
+1. Deploy three separate semantic-search indexes matching the Studio configuration
+2. Register the `RavenDB Helpdesk Grounded v1` test agent with identifier `ravendb-helpdesk-grounded-v1`
+3. Configure the `Grounded`, `NeedsClarification`, and `NotFound` response contract
 
 ---
 
@@ -230,7 +233,9 @@ cd TelegramBot && dotnet run
 | Agent not found error | Run `dotnet run` in `HelpdeskAgent/` to deploy it |
 | Telegram bot token error | Get a new token from @BotFather |
 | Python import errors | Activate `.venv` and reinstall dependencies |
-| Index is stale | Wait for indexing to complete, or check for errors in Studio |
+| Index is stale | Wait for indexing to complete, or check for embedding task/index errors in Studio |
+| Agent gives a generic answer | Verify all three tool index names exist and redeploy `HelpdeskAgent` |
+| Telegram shows the not-found response for a good answer | Verify the agent returned `AnswerStatus = Grounded` and at least one exact allowed source URL |
 
 ---
 
@@ -246,7 +251,7 @@ cd TelegramBot && dotnet run
 - [x] GoogleGroupMessages collection populated
 - [x] Embedding tasks created (documentations, discussions)
 - [x] Semantic search indexes created
-- [ ] GoogleGroupMessages embedding task (pending)
+- [x] GoogleGroupMessages embedding task configured or the Google Groups tool intentionally left unavailable
 - [x] AI Agent deployed
 - [x] Telegram Bot configured
 
